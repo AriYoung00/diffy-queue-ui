@@ -275,33 +275,37 @@ impl<'a> SolverApp<'a> {
                 ).name("Actual Solution")).height(ui.available_size().y/2.);
             }
 
-            let err_plot = Plot::new("Error Plot")
-                .curve(Curve::from_values_iter(
-                    self.solvers.euler_solver.solved_pts.iter().filter(|p| p.0 < self.t_max as f64).map(
-                        |pt| Value::new(pt.0, pt.1 - self.solvers.actual_soln.as_ref().unwrap()(pt.0))
-                    )
-                ).name("Euler Error"))
-                .curve(Curve::from_values_iter(
-                    self.solvers.rk4_solver.solved_pts.iter().filter(|p| p.0 < self.t_max as f64).map(
-                        |pt| Value::new(pt.0, pt.1 - self.solvers.actual_soln.as_ref().unwrap()(pt.0))
-                    )
-                ).name("RK4 Error"))
-                .curve(Curve::from_values_iter(
-                    self.solvers.dopri_solver.solved_pts.iter().filter(|p| p.0 < self.t_max as f64).map(
-                        |pt| Value::new(pt.0, pt.1 - self.solvers.actual_soln.as_ref().unwrap()(pt.0))
-                    )
-                ).name("DOPRI Error"))
-                .height(ui.available_size().y/2.-50.);
-
             ui.heading("Solution Plot: ");
             ui.add(soln_plot);
-            ui.heading("Error Plot: ");
-            ui.add(err_plot);
+
+            if self.solvers.actual_soln.is_some() {
+                let err_plot = Plot::new("Error Plot")
+                    .curve(Curve::from_values_iter(
+                        self.solvers.euler_solver.solved_pts.iter().filter(|p| p.0 < self.t_max as f64).map(
+                            |pt| Value::new(pt.0, pt.1 - self.solvers.actual_soln.as_ref().unwrap()(pt.0))
+                        )
+                    ).name("Euler Error"))
+                    .curve(Curve::from_values_iter(
+                        self.solvers.rk4_solver.solved_pts.iter().filter(|p| p.0 < self.t_max as f64).map(
+                            |pt| Value::new(pt.0, pt.1 - self.solvers.actual_soln.as_ref().unwrap()(pt.0))
+                        )
+                    ).name("RK4 Error"))
+                    .curve(Curve::from_values_iter(
+                        self.solvers.dopri_solver.solved_pts.iter().filter(|p| p.0 < self.t_max as f64).map(
+                            |pt| Value::new(pt.0, pt.1 - self.solvers.actual_soln.as_ref().unwrap()(pt.0))
+                        )
+                    ).name("DOPRI Error"))
+                    .height(ui.available_size().y-20.);
+
+                ui.heading("Error Plot: ");
+                ui.add(err_plot);
+            }
         });
     }
 
     fn render_table_view(&mut self, ui: &mut Ui) {
-        ui.vertical(|ui| {
+        ui.vertical_centered(|ui| {
+            ui.label("Enter a comma-separated list of points to solve at: ");
             if ui.add(TextEdit::multiline(&mut self.table_points_str)
                 .text_color(self.table_points_color))
                 .changed() {
