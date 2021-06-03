@@ -3,9 +3,12 @@
 
 mod app;
 pub use app::SolverApp;
+use egui_web::{resize_canvas_to_screen_size, console_log};
 
 #[cfg(target_arch = "wasm32")]
 use eframe::wasm_bindgen::{self, prelude::*};
+use eframe::egui::Vec2;
+use eframe::epi::App;
 
 /// This is the entry-point for all the web-assembly.
 /// This is called once from the HTML.
@@ -15,5 +18,6 @@ use eframe::wasm_bindgen::{self, prelude::*};
 #[wasm_bindgen]
 pub fn start(canvas_id: &str) -> Result<(), eframe::wasm_bindgen::JsValue> {
     let app = SolverApp::new();
+    resize_canvas_to_screen_size(canvas_id, Vec2::new(1400., 1100.));
     eframe::start_web(canvas_id, Box::new(app))
 }
