@@ -34,7 +34,7 @@ impl<'a> ComparativeSolver<'a> {
             dopri_solver: DOPRISolver::new(expr.bind2("t", "x").unwrap(), 0.0, 1.0, 0.01, 0.0001, 0.001),
             actual_soln: Some(Box::new(|x: f64| E.powf(0.5 * x.powf(2.0)))),
 
-            dopri_step_bounds: (0.0001, 0.01),
+            dopri_step_bounds: (0.0001, 0.001),
         }
     }
 
