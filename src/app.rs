@@ -143,7 +143,7 @@ impl<'a> SolverApp<'a> {
             t_max_str: "3".to_string(),
             t_max: 3,
 
-            dopri_bounds_str: ("0.0001".to_string(), "0.01".to_string()),
+            dopri_bounds_str: ("0.0001".to_string(), "0.001".to_string()),
             dopri_bounds_color: (Color32::WHITE, Color32::WHITE),
 
             selected_view: SolverView::Grapher,
