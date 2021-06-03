@@ -255,51 +255,51 @@ impl<'a> SolverApp<'a> {
         ui.separator();
 
         ui.vertical_centered(|ui| {
-            let mut soln_plot = Plot::new("Solution Plot")
-                .curve(Curve::from_values_iter((0..=self.t_max*100)
-                    .map(|x| x as f64 / 100.0)
-                    .map(|x| Value::new(x, self.solvers.euler_solver.solve_at_point(x).unwrap()))
-                ).name("Euler Solution"))
-                .curve(Curve::from_values_iter((0..=self.t_max*100)
-                    .map(|x| x as f64 / 100.0)
-                    .map(|x| Value::new(x, self.solvers.rk4_solver.solve_at_point(x).unwrap()))
-                ).name("RK4 Solution"))
-                .curve(Curve::from_values_iter((0..=self.t_max*100)
-                    .map(|x| x as f64 / 100.0)
-                    .map(|x| Value::new(x, self.solvers.dopri_solver.solve_at_point(x).unwrap()))
-                ).name("DOPRI Solution"));
-            if self.solvers.actual_soln.is_some() {
-                soln_plot = soln_plot.curve(Curve::from_values_iter((0..=self.t_max*100)
-                    .map(|x| x as f64 / 100.0)
-                    .map(|x| Value::new(x, (self.solvers.actual_soln.as_ref().unwrap())(x) ))
-                ).name("Actual Solution")).height(ui.available_size().y/2.);
-            }
+            ui.columns(2, |cols| {
+                let mut soln_plot = Plot::new("Solution Plot")
+                    .curve(Curve::from_values_iter((0..=self.t_max * 100)
+                        .map(|x| x as f64 / 100.0)
+                        .map(|x| Value::new(x, self.solvers.euler_solver.solve_at_point(x).unwrap()))
+                    ).name("Euler Solution"))
+                    .curve(Curve::from_values_iter((0..=self.t_max * 100)
+                        .map(|x| x as f64 / 100.0)
+                        .map(|x| Value::new(x, self.solvers.rk4_solver.solve_at_point(x).unwrap()))
+                    ).name("RK4 Solution"))
+                    .curve(Curve::from_values_iter((0..=self.t_max * 100)
+                        .map(|x| x as f64 / 100.0)
+                        .map(|x| Value::new(x, self.solvers.dopri_solver.solve_at_point(x).unwrap()))
+                    ).name("DOPRI Solution"));
+                if self.solvers.actual_soln.is_some() {
+                    soln_plot = soln_plot.curve(Curve::from_values_iter((0..=self.t_max * 100)
+                        .map(|x| x as f64 / 100.0)
+                        .map(|x| Value::new(x, (self.solvers.actual_soln.as_ref().unwrap())(x)))
+                    ).name("Actual Solution"));//.height(ui.available_size().y / 2.);
+                }
 
-            ui.heading("Solution Plot: ");
-            ui.add(soln_plot);
+                cols[0].heading("Solution Plot: ");
+                cols[0].add(soln_plot);
 
-            if self.solvers.actual_soln.is_some() {
-                let err_plot = Plot::new("Error Plot")
-                    .curve(Curve::from_values_iter(
-                        self.solvers.euler_solver.solved_pts.iter().filter(|p| p.0 < self.t_max as f64).map(
-                            |pt| Value::new(pt.0, pt.1 - self.solvers.actual_soln.as_ref().unwrap()(pt.0))
-                        )
-                    ).name("Euler Error"))
-                    .curve(Curve::from_values_iter(
-                        self.solvers.rk4_solver.solved_pts.iter().filter(|p| p.0 < self.t_max as f64).map(
-                            |pt| Value::new(pt.0, pt.1 - self.solvers.actual_soln.as_ref().unwrap()(pt.0))
-                        )
-                    ).name("RK4 Error"))
-                    .curve(Curve::from_values_iter(
-                        self.solvers.dopri_solver.solved_pts.iter().filter(|p| p.0 < self.t_max as f64).map(
-                            |pt| Value::new(pt.0, pt.1 - self.solvers.actual_soln.as_ref().unwrap()(pt.0))
-                        )
-                    ).name("DOPRI Error"))
-                    .height(ui.available_size().y-20.);
-
-                ui.heading("Error Plot: ");
-                ui.add(err_plot);
-            }
+                let mut err_plot = Plot::new("Error Plot");
+                if self.solvers.actual_soln.is_some() {
+                        err_plot = err_plot.curve(Curve::from_values_iter(
+                            self.solvers.euler_solver.solved_pts.iter().filter(|p| p.0 < self.t_max as f64).map(
+                                |pt| Value::new(pt.0, pt.1 - self.solvers.actual_soln.as_ref().unwrap()(pt.0))
+                            )
+                        ).name("Euler Error"))
+                        .curve(Curve::from_values_iter(
+                            self.solvers.rk4_solver.solved_pts.iter().filter(|p| p.0 < self.t_max as f64).map(
+                                |pt| Value::new(pt.0, pt.1 - self.solvers.actual_soln.as_ref().unwrap()(pt.0))
+                            )
+                        ).name("RK4 Error"))
+                        .curve(Curve::from_values_iter(
+                            self.solvers.dopri_solver.solved_pts.iter().filter(|p| p.0 < self.t_max as f64).map(
+                                |pt| Value::new(pt.0, pt.1 - self.solvers.actual_soln.as_ref().unwrap()(pt.0))
+                            )
+                        ).name("DOPRI Error"))
+                }
+                cols[1].heading("Error Plot: ");
+                cols[1].add(err_plot);
+            });
         });
     }
 
@@ -356,7 +356,6 @@ const SMALL_WIDTH: f32 = 75.0;
 const BIG_WIDTH: f32 = 125.0;
 impl epi::App for SolverApp<'_> {
     fn update(&mut self, ctx: &CtxRef, _frame: &mut Frame<'_>) {
-        _frame.set_window_size(Vec2::new(1100., 1500.));
         egui::CentralPanel::default().show(ctx, |ui| {
             self.render_header(ui);
 
