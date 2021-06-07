@@ -2,6 +2,8 @@
 name = "diffy-queue-ui"
 version = "0.1.0"
 edition = "2018"
+description = "An application to numerically solve and graph the solutions to ODEs"
+
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -15,3 +17,9 @@ meval = "0.2"
 [dependencies.getrandom]
 version = "0.2.3"
 features = ["js"]
+
+[package.metadata.bundle]
+name = "DiffyQ Solver"
+identifier = "io.github.DarthGeek01.diffy-queue-ui"
+short_description = "An application to numerically solve and graph the solutions to ODEs"
+icon = ["32x32.png", "128x128.png"]

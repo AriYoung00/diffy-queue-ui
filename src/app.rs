@@ -31,7 +31,7 @@ impl<'a> ComparativeSolver<'a> {
             step_size: 0.01,
             euler_solver: EulerSolver::new(expr.clone().bind2("t", "x").unwrap(), 0.0, 1.0, 0.01),
             rk4_solver: RK4Solver::new(expr.clone().bind2("t", "x").unwrap(), 0.0, 1.0, 0.01),
-            dopri_solver: DOPRISolver::new(expr.bind2("t", "x").unwrap(), 0.0, 1.0, 0.01, 0.0001, 0.001),
+            dopri_solver: DOPRISolver::new(expr.bind2("t", "x").unwrap(), 0.0, 1.0, 0.001, 0.0001, 0.001),
             actual_soln: Some(Box::new(|x: f64| E.powf(0.5 * x.powf(2.0)))),
 
             dopri_step_bounds: (0.0001, 0.001),
@@ -39,7 +39,16 @@ impl<'a> ComparativeSolver<'a> {
     }
 
     pub fn set_eqn(&mut self, s: &String) -> Result<(), meval::Error> {
+        let l = s.len();
+        if l >= 2 && s.chars().nth(l-1).unwrap() == '^' && s.chars().nth(l-2).unwrap() == 'x' {
+            println!("short circuiting");
+            return Ok(());
+        }
+        println!("continuing");
+
         let expr = s.parse::<meval::Expr>()?;
+
+        println!("{:?}", expr);
         self.euler_solver.set_fn(expr.clone().bind2("t", "x")?);
         self.dopri_solver.set_fn(expr.clone().bind2("t", "x")?);
         self.rk4_solver.set_fn(expr.bind2("t", "x")?);
@@ -257,20 +266,20 @@ impl<'a> SolverApp<'a> {
         ui.vertical_centered(|ui| {
             ui.columns(2, |cols| {
                 let mut soln_plot = Plot::new("Solution Plot")
-                    .curve(Curve::from_values_iter((0..=self.t_max * 100)
+                    .curve(Curve::from_values_iter(((self.solvers.initial_pt.0 as i64 * 100)..=self.t_max * 100)
                         .map(|x| x as f64 / 100.0)
                         .map(|x| Value::new(x, self.solvers.euler_solver.solve_at_point(x).unwrap()))
                     ).name("Euler Solution"))
-                    .curve(Curve::from_values_iter((0..=self.t_max * 100)
+                    .curve(Curve::from_values_iter(((self.solvers.initial_pt.0 as i64 * 100)..=self.t_max * 100)
                         .map(|x| x as f64 / 100.0)
                         .map(|x| Value::new(x, self.solvers.rk4_solver.solve_at_point(x).unwrap()))
                     ).name("RK4 Solution"))
-                    .curve(Curve::from_values_iter((0..=self.t_max * 100)
+                    .curve(Curve::from_values_iter(((self.solvers.initial_pt.0 as i64 * 100)..=self.t_max * 100)
                         .map(|x| x as f64 / 100.0)
                         .map(|x| Value::new(x, self.solvers.dopri_solver.solve_at_point(x).unwrap()))
                     ).name("DOPRI Solution"));
                 if self.solvers.actual_soln.is_some() {
-                    soln_plot = soln_plot.curve(Curve::from_values_iter((0..=self.t_max * 100)
+                    soln_plot = soln_plot.curve(Curve::from_values_iter(((self.solvers.initial_pt.0 as i64 * 100)..=self.t_max * 100)
                         .map(|x| x as f64 / 100.0)
                         .map(|x| Value::new(x, (self.solvers.actual_soln.as_ref().unwrap())(x)))
                     ).name("Actual Solution"));//.height(ui.available_size().y / 2.);
